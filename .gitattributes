@@ -1,2 +1,68 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+var dataset= ee.ImageCollection('MODIS/006/MOD16A2')
+                .filter(ee.Filter.date('2022-01-01'));
+                
+
+var evapotranspiration= dataset.select('ET');
+var EvaVis= {
+  min:0.0,
+  max:400.0,
+  palette: [
+    'ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'],
+    
+    
+};
+
+var dataset2= ee.ImageCollection('MODIS/006/MOD16A2')
+                .filter(ee.Filter.date('2022-01-09'));
+var evapotranspiration2= dataset.select('ET');
+var EvaVis2= {
+  min:0.0,
+  max:400.0,
+  palette: [
+    'ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'],
+    
+    
+};                
+//Map.addLayer(evapotranspiration, EvaVis, 'Global Evapotranspiration on 2021-01-01 ');
+//Map.addLayer(evapotranspiration2, EvaVis2, 'Global Evapotranspiration on 2021-01-09');
+
+var start_year= 2001 
+var startDate= start_year+'-01-01'
+var end_year=2021
+var endDate= end_year +'-12-20'
+
+var no_of_years= end_year-start_year + 1
+var etPalette= ['#a50026','ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'];
+var etPalette_scale_start= 0
+var etPalette_scale_end= 4
+var et =  ee.ImageCollection('MODIS/006/MOD16A2')
+            .filterDate(startDate,endDate)
+            .select('ET')
+var count = et.size()
+print("collection count",count)
+var months= ee.List.sequence(1,12);
+var years= ee.List.sequence(start_year,end_year);
+
+var byMonthYear= ee.ImageCollection.fromImages(
+  years.map(function(y)  {
+    return months.map(function(m) {
+      return et
+        .filter(ee.Filter.calendarRange(y,y,'year'))
+        .filter(ee.Filter.calendarRange(m,m,'month'))
+        .sum()
+        .multiply(0.1) //for scaling to factors
+        .selfMask()
+        .set('month',m)
+        .set('year',y)
+        .set("system:time_start", ee.Date.fromYMD(y,m,1).millis());
+        });
+        
+  }).flatten());
+print(byMonthYear)
+Map.addLayer(byMonthYear, EvaVis2, 'from 2001 to 2021 ');
+
+Export.image.toDrive({
+  image: byMonthYear,
+  description: 'saving image to drive',
+  
+});
