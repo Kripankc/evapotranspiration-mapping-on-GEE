@@ -1,0 +1,51 @@
+var start_year= 2021 
+var startDate= start_year+'-01-01'
+var end_year=2021
+var endDate= end_year +'-12-20'
+
+var no_of_years= end_year-start_year + 1
+var etPalette= ['ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'];
+
+
+var EvaVis= {
+  min:0.0,
+  max:400.0,
+  palette: [
+    'ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'],
+    
+    
+};
+
+
+var et =  ee.ImageCollection('MODIS/006/MOD16A2')
+            .filterDate(startDate,endDate)
+            .select('ET')
+var count = et.size()
+print("collection count",count)
+var months= ee.List.sequence(1,12);
+var years= ee.List.sequence(start_year,end_year);
+
+var image1= ee.ImageCollection.fromImages(
+  years.map(function(y)  {
+    return months.map(function(m) {
+      return et
+        .filter(ee.Filter.calendarRange(y,y,'year'))
+        .filter(ee.Filter.calendarRange(m,m,'month'))
+        .sum()
+        .multiply(0.1) //for scaling to factors
+        .selfMask()
+        .set('month',m)
+        .set('year',y)
+        .clip(geometry)
+        .set("system:time_start", ee.Date.fromYMD(y,m,1).millis());
+        });
+        
+  }).flatten());
+print(image1);
+var one = image1.select('ET')
+
+var month1 = one
+              .filter(ee.Filter.eq('month', 1))
+Map.addLayer(month1,EvaVis,'month1')
+                
+print(month1);
