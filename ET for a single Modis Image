@@ -1,0 +1,24 @@
+var etPalette= ['ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'];
+
+
+var EvaVis= {
+  min:0.0,
+  max:400.0,
+  palette: [
+    'ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'],
+    
+    
+};
+var et =  ee.ImageCollection('MODIS/006/MOD16A2')
+            .filterDate('2021-01-01','2021-01-09')
+            .select('ET');
+print(et);
+Map.addLayer(et,EvaVis,'1image');
+Export.image.toDrive({
+               image: et,
+               fileFormat: 'GeoTIFF',
+               description: 'et',
+               fileNamePrefix: 'nam',
+               scale: 30,
+               
+               maxPixels: 1e13
