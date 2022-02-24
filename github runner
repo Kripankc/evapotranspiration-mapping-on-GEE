@@ -1,0 +1,55 @@
+var subset = Map.getBounds(true)
+var Start_period = ee.Date('2001-10-01')
+var End_period = ee.Date(new Date().getTime())
+
+var modis = ee.ImageCollection("MODIS/006/MOD16A2")
+    .filterBounds(subset)
+    .filterDate(Start_period, End_period)
+    .select('ET')
+
+var collection = modis.map(function(image) {
+  return image.select('ET')
+});
+
+var Vis= {
+  min:0.0,
+  max:400.0,
+  palette: [
+    'ffffff', 'fcd163', '99b718' ,'66a000', '3e8601', '207401','056201','004c00', '011301'],
+    
+    
+};
+
+ee.Dictionary({start: Start_period, end: End_period})
+  .evaluate(renderSlider) 
+
+function renderSlider(dates) {
+  var slider = ui.DateSlider({
+    start: dates.start.value, 
+    end: dates.end.value, 
+    period: 8, // Every 8 days
+    onChange: renderDateRange
+  })
+  Map.add(slider)
+}
+
+function renderDateRange(dateRange) {
+  var image = collection
+    .filterDate(dateRange.start(), dateRange.end())
+ee.Algorithms.If(ee.String('0').compareTo('0'),0,1);
+var layer = ui.Map.Layer(image, Vis, 'ET')
+  Map.addLayer(image, Vis , 'hola ki ')
+  
+  print(image)
+  Export.image.toDrive({
+               image: image,
+               region: geometry,
+               fileFormat: 'GeoTIFF',
+               description: 'Image',
+               fileNamePrefix: 'image1',
+               scale: 30,
+               
+               maxPixels: 1e13
+               
+});
+}
