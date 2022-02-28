@@ -1,8 +1,8 @@
 import sys
 import numpy as np
-'''om geet.common import is_img
-from geet.meteo import compute_met_params, relative_humidity
-from geet.vegetation import compute_ftheta'''
+from geeet import is_img
+from geeet.meteo import compute_met_params, relative_humidity
+from geeet.vegetation import compute_ftheta
 try: 
     import ee
 except Exception:
