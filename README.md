@@ -1,4 +1,4 @@
-# evapotranspiration-mapping-on-GEE
+# Evapotranspiration-mapping-on-GEE
 
 Day 1 evapotranspiration mapping using Google Earth Engine (GEE) and Python.
 
